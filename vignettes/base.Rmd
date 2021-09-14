@@ -29,6 +29,8 @@ knitr::opts_chunk$set(
 library(RNAseqFlow)
 input = createCountPhe()
 
+head(input[[1]])
+head(input[[2]])
 dds = DEseqObj(count_data=input[[1]],col_data=input[[2]],design_names = "condition+type",group_name ="condition",ref_level = "untreated")
 res = DESeqRes(dds,foldChange=0.58,adjPvalue=0.05)
 DESeqObjPCA(dds) # plot PCA
@@ -87,6 +89,7 @@ gseakeggRes = GSEAkegg(geneList,organism = "hsa",type = "ENTREZID")
 print(overallGSEA(head(gseakeggRes,20),Description,NES))
 ```
 
-## Todo
-添加batch相关信息，将RNAseqWorkflowDEseq2的内容合并进来。
+
+
+
 

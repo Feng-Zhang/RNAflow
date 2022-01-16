@@ -6,15 +6,15 @@
 ##' @import pasilla
 ##' @importFrom utils read.csv read.table
 ##' @importFrom stats median
-##' @importFrom GEOmeta GSEtoExpr
+##' @importFrom GEOmeta saveGSE
 ##' @export
-createCountPhe = function(GSE=NULL){
+createCountPhe <- function(GSE=NULL){
   UseMethod('createCountPhe')
 }
 
 #' @rdname createCountPhe
 #' @export
-createCountPhe.default = function(GSE=NULL){
+createCountPhe.default <- function(GSE=NULL){
   #library("pasilla")
 
   # import expression data
@@ -40,20 +40,20 @@ createCountPhe.default = function(GSE=NULL){
   all(rownames(col_data) == colnames(count_data))
 
   # clean expression data by keeping genes with mean count >0, median count >0
-  count_data = count_data[rowMeans(count_data) > 1 & apply(count_data,1,median)>0 ,]
+  count_data <- count_data[rowMeans(count_data) > 1 & apply(count_data,1,median)>0 ,]
 
   return(list(count_data,col_data))
 }
 
 #' @rdname createCountPhe
 #' @export
-createCountPhe.character = function(GSE="GSE24132"){
+createCountPhe.character <- function(GSE="GSE24132"){
   #library(GEOmeta);data(phe_test)
-  GSEtoExpr(GSE, destdir = "../tmp")
-  expr_filename = dir("../tmp",pattern = paste0("^",GSE,".*GPL.*-matrix.txt$"))
-  count_data = read.table(paste0("../tmp/",expr_filename),header = TRUE,row.names = 1)
-  col_data = GEOmeta::phe_test[GEOmeta::phe_test$GSE==GSE,2:3]
-  row.names(col_data) = col_data[,"GSM"]
+  saveGSE(GSE, destdir = "../tmp")
+  expr_filename <- dir("../tmp",pattern = paste0("^",GSE,".*GPL.*-matrix.txt$"))
+  count_data <- read.table(paste0("../tmp/",expr_filename),header = TRUE,row.names = 1)
+  col_data <- GEOmeta::phe_test[GEOmeta::phe_test$GSE==GSE,2:3]
+  row.names(col_data) <- col_data[,"GSM"]
 
   all(rownames(col_data) %in% colnames(count_data))
   all(rownames(col_data) == colnames(count_data))

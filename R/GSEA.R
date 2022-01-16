@@ -1,35 +1,36 @@
-##' @title GSEAgo
+# ##' @title GSEA_go
+# ##' @description This function would plot volcano based on DESeqDEGres output and save as pdf and png format
+# ##' @param change_gene_List a numeric vector of the fold change of genes. It must have name with ENTREZID.
+# ##' @param db the database, such as org.Hs.eg.db , org.Mm.eg.db and so on.
+# ##' @param type  the type of ids which must be one of idType(OrgDb = db) shows
+# ##' @param setReadable A logical value, mapping geneID to gene Symbol. If geneID is Symbol, the value should be FALSE.
+# ##' @param ... Aavailable arguments to be passed to gseGO
+# ##' @return NULL
+# ##' @examples
+# ##' \dontrun{
+# ##' data(geneList, package="DOSE")
+# ##' ego <- GSEAgo(geneList)
+# ##' }
+# ##' @importFrom clusterProfiler gseGO  setReadable
+# ##' @importFrom utils modifyList
+# ##' @export
+# ##'
+#
+# GSEA_go <- function(change_gene_List,db=org.Hs.eg.db,type="ENTREZID",setReadable=FALSE,...){
+#   #change_gene_List=geneList
+#   ego <- NULL
+#   change_gene_List <- sort(change_gene_List, decreasing = TRUE)
+#   dotargs <- list(...)
+#   defargs <- list(geneList=change_gene_List, ont="BP",OrgDb=db,eps=0,keyType = type)
+#   ego <- do.call("gseGO",modifyList(defargs,dotargs))
+#   if(setReadable) ego <- setReadable(ego, OrgDb = db) #names(x) <- value : 'names' attribute [2] must be the same length as the vector [1]
+#   return(ego)
+# }
+#
+
+##' @title GSEA_kegg
 ##' @description This function would plot volcano based on DESeqDEGres output and save as pdf and png format
-##' @param geneChangeList a numeric vector of the fold change of genes. It must have name with ENTREZID.
-##' @param db the database, such as org.Hs.eg.db , org.Mm.eg.db and so on.
-##' @param type  the type of ids which must be one of idType(OrgDb = db) shows
-##' @param ... Aavailable arguments to be passed to gseGO
-##' @return NULL
-##' @examples
-##' \dontrun{
-##' data(geneList, package="DOSE")
-##' ego = GSEAgo(geneList)
-##' }
-##' @importFrom clusterProfiler gseGO  setReadable
-##' @importFrom utils modifyList
-##' @export
-##'
-
-GSEAgo = function(geneChangeList,db=org.Hs.eg.db,type="ENTREZID",...){
-  #geneChangeList=geneList
-  ego <- NULL
-  geneChangeList = sort(geneChangeList, decreasing = TRUE)
-  dotargs=list(...)
-  defargs=list(geneChangeList, ont="BP",OrgDb=db,eps=0,keyType = type)
-  ego = do.call("gseGO",modifyList(defargs,dotargs))
-  ego = setReadable(ego, OrgDb = db)
-  return(ego)
-}
-
-
-##' @title GSEAkegg
-##' @description This function would plot volcano based on DESeqDEGres output and save as pdf and png format
-##' @param geneChangeList a numeric vector of the fold change of genes. It must have name with ENTREZID.
+##' @param change_gene_List a numeric vector of the fold change of genes. It must have name with ENTREZID.
 ##' @param organism supported organism listed in 'http://www.genome.jp/kegg/catalog/org_list.html', such as hsa for human, mmu for mouse.
 ##' @param db the annotation database of specific organism
 ##' @param type  the type of ids which must be one of idType(OrgDb = db) shows
@@ -38,25 +39,26 @@ GSEAgo = function(geneChangeList,db=org.Hs.eg.db,type="ENTREZID",...){
 ##' @examples
 ##' \dontrun{
 ##' data(geneList, package="DOSE")
-##' ekegg = GSEAkegg(geneList)
+##' ekegg <- GSEAkegg(geneList)
 ##' }
-##' @importFrom clusterProfiler gseKEGG setReadable
+##' @importFrom clusterProfiler gseKEGG setReadable bitr
 ##' @importFrom org.Hs.eg.db org.Hs.eg.db
+##' @importFrom utils modifyList
 ##' @export
 ##'
 
-GSEAkegg = function(geneChangeList,organism="hsa",db=org.Hs.eg.db,type="SYMBOL",...){
+GSEA_kegg <- function(change_gene_List,organism="hsa",db=org.Hs.eg.db,type="SYMBOL",...){
   ekegg <- NULL
   if(type!="ENTREZID") {
-    mappedIds = bitr(names(geneChangeList), fromType=type, toType="ENTREZID", OrgDb=db)
-    geneChangeList = geneChangeList[mappedIds[,type]]
-    names(geneChangeList) = mappedIds[,"ENTREZID"]
+    mappedIds <- bitr(names(change_gene_List), fromType=type, toType="ENTREZID", OrgDb=db)
+    change_gene_List <- change_gene_List[mappedIds[,type]]
+    names(change_gene_List) <- mappedIds[,"ENTREZID"]
   }
-  geneChangeList = sort(geneChangeList, decreasing = TRUE)
-  dotargs=list(...)
-  defargs=list(geneChangeList,organism=organism,keyType="ncbi-geneid",pvalueCutoff = 0.05)
-  ekegg = do.call("gseKEGG",modifyList(defargs,dotargs))
-  ekegg = setReadable(ekegg, OrgDb = db,keyType = "ENTREZID")
+  change_gene_List <- sort(change_gene_List, decreasing = TRUE)
+  dotargs <- list(...)
+  defargs <- list(change_gene_List,organism=organism,keyType="ncbi-geneid",pvalueCutoff = 0.05)
+  ekegg <- do.call("gseKEGG",modifyList(defargs,dotargs))
+  ekegg <- setReadable(ekegg, OrgDb = db,keyType = "ENTREZID")
   return(ekegg)
 }
 

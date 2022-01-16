@@ -1,24 +1,31 @@
-RNAseq 工作流程
----------------
+## RNAseq 工作流程
 
     library(RNAseqFlow)
-    input = createCountPhe()
+    input <- createCountPhe()
 
-    dds = DEseqObj(count_data=input[[1]],col_data=input[[2]],design_names = "condition+type",group_name ="condition",ref_level = "untreated")
+    head(input[[1]])
+    #>             treated1 treated2 treated3 untreated1 untreated2 untreated3 untreated4
+    #> FBgn0000008      140       88       70         92        161         76         70
+    #> FBgn0000017     6205     3072     3334       4664       8714       3564       3150
+    #> FBgn0000018      722      299      308        583        761        245        310
+    #> FBgn0000024       10        7        5         10         11          3          3
+    #> FBgn0000032     1698      696      757       1446       1713        615        672
+    #> FBgn0000037       20       14       17         15         25          9          5
+    input[[2]]
+    dds <- create_DEseq(count_data=input[[1]],col_data=input[[2]],design_names = "condition+type",group_name ="condition",ref_level = "untreated")
     #> [1] "The id order between gene count file and phenotype file is identical without modification!"
-    res = DESeqRes(dds,foldChange=0.58,adjPvalue=0.05)
-    DESeqObjPCA(dds) # plot PCA
+    res <- DESeq_res(dds,fold_change_line=0.58,adj_pvalue_line =0.05)
+    DESeq_PCA(dds) # plot PCA
 
-![](../Figs/unnamed-chunk-2-1.png)
+![](../Figs/unnamed-chunk-3-1.png)
 
-    DESeqResVolcano(res) # plot volcano
+    volcano(res) # plot volcano
 
-![](../Figs/unnamed-chunk-2-2.png)
+![](../Figs/unnamed-chunk-3-2.png)
 
-    DEsig = row.names(res)[res$regulate!="Normal"]
+    DEsig <- row.names(res)[res$regulate!="Normal"]
 
-富集分析
---------
+## 富集分析
 
 加载一些程序包：
 
@@ -27,58 +34,54 @@ RNAseq 工作流程
 
 ### GO 过度代表检验 (over-representation test)
 
-    goRes = GO(DEsig,type="ENSEMBL",db=org.Dm.eg.db)
-
-为了方便查看，需要把GO和KEGG的结果保存为文件时，base\_name参数可以实现这个功能。
+    idType(OrgDb = org.Dm.eg.db)
+    #>  [1] "ACCNUM"       "ALIAS"        "ENSEMBL"      "ENSEMBLPROT"  "ENSEMBLTRANS" "ENTREZID"    
+    #>  [7] "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "FLYBASE"      "FLYBASECG"    "FLYBASEPROT" 
+    #> [13] "GENENAME"     "GENETYPE"     "GO"           "GOALL"        "MAP"          "ONTOLOGY"    
+    #> [19] "ONTOLOGYALL"  "PATH"         "PMID"         "REFSEQ"       "SYMBOL"       "UNIPROT"
+    go_res <- enrichGO(DEsig,keyType="ENSEMBL",OrgDb=org.Dm.eg.db)
+    head(go_res)
 
 ### KEGG 过度代表检验 (over-representation test)
 
-    keggRes = KEGG(DEsig,type="ENSEMBL",organism="dme",db=org.Dm.eg.db);
-    head(keggRes)
-    #>                ID                                 Description GeneRatio  BgRatio       pvalue   p.adjust
-    #> dme04141 dme04141 Protein processing in endoplasmic reticulum     11/77 135/3263 0.0002598714 0.01481267
-    #>              qvalue                                                               geneID Count
-    #> dme04141 0.01449809 318098/36310/39474/35480/3355079/43785/34433/32180/44921/48582/48583    11
+    DEsig_entrezid <- bitr(DEsig, fromType="ENSEMBL", toType="ENTREZID", OrgDb=org.Dm.eg.db)[,2]
+    kegg_res <- enrichKEGG(DEsig_entrezid,keyType="ncbi-geneid",organism="dme");
+    head(kegg_res)
 
 值得注意的是，当进行KEGG或gseKEGG时，如果物种是人类，那么基因名为ENTREZID时，对应的keyType是“kegg”或“ncbi-geneid”。当对其它物种进行分析时，ENTREZID对应的是ncbi-geneid。
 
 ### GO的GSEA分析
 
-    geneList = res$log2FoldChange
-    names(geneList)=row.names(res)
-    gseagoRes = GSEAgo(geneList,type="ENSEMBL",db=org.Dm.eg.db)
-    head(gseagoRes)
-    #>                    ID                                          Description setSize enrichmentScore
-    #> GO:0034620 GO:0034620                cellular response to unfolded protein      31      -0.7915683
-    #> GO:0006986 GO:0006986                         response to unfolded protein      33      -0.7833215
-    #> GO:0035967 GO:0035967 cellular response to topologically incorrect protein      45      -0.7009554
-    #> GO:0042026 GO:0042026                                    protein refolding      16      -0.8571092
-    #> GO:0035966 GO:0035966          response to topologically incorrect protein      47      -0.6964722
-    #>                  NES       pvalue   p.adjust    qvalues rank                  leading_edge
-    #> GO:0034620 -2.251655 6.911188e-06 0.01024721 0.01024721  297 tags=23%, list=3%, signal=22%
-    #> GO:0006986 -2.266891 7.655743e-06 0.01024721 0.01024721  297 tags=21%, list=3%, signal=21%
-    #> GO:0035967 -2.154785 1.585020e-05 0.01414366 0.01414366  451 tags=22%, list=4%, signal=21%
-    #> GO:0042026 -2.149696 4.627369e-05 0.03096867 0.03096867  104 tags=44%, list=1%, signal=43%
-    #> GO:0035966 -2.166721 7.912020e-05 0.04236095 0.04236095  451 tags=21%, list=4%, signal=20%
-    #>                                                                          core_enrichment
-    #> GO:0034620                         Gba1b/CG1924/Hsc70-2/Hsp70Ba/Hsp70Bbb/Hsp70Ba/Hsp70Ba
-    #> GO:0006986                         Gba1b/CG1924/Hsc70-2/Hsp70Ba/Hsp70Bbb/Hsp70Ba/Hsp70Ba
-    #> GO:0035967 CG32640/Gba1b/CG1924/CG32640/Hsc70-2/Hsp70Ba/Hsp70Bbb/Hsp70Ba/Hsp70Ba/CG32581
-    #> GO:0042026                         Hsp27/Hsp60A/Hsc70-2/Hsp70Ba/Hsp70Bbb/Hsp70Ba/Hsp70Ba
-    #> GO:0035966 CG32640/Gba1b/CG1924/CG32640/Hsc70-2/Hsp70Ba/Hsp70Bbb/Hsp70Ba/Hsp70Ba/CG32581
-    if(nrow(gseagoRes)>=1){
-      print(gseaplot(gseagoRes,geneSetID=gseagoRes$ID[1],title=paste("BP : ",gseagoRes$Description[1],sep="")))
-    }
+    gene_list <- res$log2FoldChange
+    names(gene_list)=row.names(res)
+    gene_list <- sort(gene_list, decreasing = TRUE)
+    gsea_go_res <- gseGO(gene_list,keyType="ENSEMBL",OrgDb=org.Dm.eg.db)
+    head(gsea_go_res)
 
-![](../Figs/unnamed-chunk-6-1.png)
+    if(nrow(gsea_go_res)>=1){
+      gsea_go_res <- setReadable(gsea_go_res, OrgDb = org.Dm.eg.db)
+      print(gseaplot(gsea_go_res,geneSetID=gsea_go_res$ID[1],title=paste("BP : ",gsea_go_res$Description[1],sep="")))
+    }
 
 ### KEGG的GSEA分析
 
-    gseakeggRes = GSEAkegg(geneList,type="ENSEMBL",organism = "dme",db=org.Dm.eg.db,pvalueCutoff=1)
-
-
-    if(nrow(gseakeggRes)>1){
-      print(gseaplot(gseakeggRes,geneSetID=gseakeggRes$ID[1],title=paste("KEGG : ",gseakeggRes$Description[1],sep="")))
+    gsea_kegg_res <- GSEA_kegg(gene_list,type="ENSEMBL",organism = "dme",db=org.Dm.eg.db,pvalueCutoff=1)
+    if(nrow(gsea_kegg_res)>1){
+      print(gseaplot(gsea_kegg_res,geneSetID=gsea_kegg_res$ID[1],title=paste("KEGG : ",gsea_kegg_res$Description[1],sep="")))
     }
 
-![](../Figs/unnamed-chunk-7-1.png)
+![](../Figs/unnamed-chunk-8-1.png)
+
+### GSEA using human databale
+
+    library(org.Hs.eg.db)
+    data(geneList,package = "DOSE")
+    gsea_go_res <- gseGO(geneList,keyType="ENTREZID",OrgDb=org.Hs.eg.db)
+    print(plot_overallGSEA(head(gsea_go_res,20),"Description","NES"))
+
+![](../Figs/unnamed-chunk-9-1.png)
+
+    gsea_kegg_res <- GSEA_kegg(geneList,organism = "hsa",type = "ENTREZID")
+    print(plot_overallGSEA(head(gsea_kegg_res,20),"Description","NES"))
+
+![](../Figs/unnamed-chunk-9-2.png)

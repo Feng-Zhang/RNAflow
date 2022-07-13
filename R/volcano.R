@@ -4,7 +4,7 @@
 ##' @param filename NULL or character, the prefix of output. When value is NULL, the figures are not saved.
 ##' @param output_dir the path of the directory to save plot
 ##' @param fold_change a character, the colname of log2(Fold Change) in de_res
-##' @param adj_pavlue a character, the colname of adjusted P-value in de_res
+##' @param adj_pvalue a character, the colname of adjusted P-value in de_res
 ##' @param de_class a character, the colname of differential expression type in de_res
 ##' @param fold_change_line a numeric, the threshold of significant log2(fold change)
 ##' @param adj_pvalue_line a numeric, the threshold of significant adjusted P-value
@@ -20,9 +20,9 @@
 ##' @importFrom grDevices pdf png dev.off
 ##' @export
 ##'
-volcano <- function(de_res,filename=NULL,output_dir=".",fold_change="log2FoldChange",adj_pavlue="padj",de_class="regulate",fold_change_line=1,adj_pvalue_line=0.05){
-  stopifnot(class(de_res)[1]=="data.frame" & all(c(fold_change,adj_pavlue,de_class)%in%colnames(de_res)))
-  g = ggplot(data=de_res,aes(x=.data[[fold_change]],y=-log10(.data[[adj_pavlue]]),colour=factor(.data[[de_class]]))) +
+volcano <- function(de_res,filename=NULL,output_dir=".",fold_change="log2FoldChange",adj_pvalue="padj",de_class="regulate",fold_change_line=1,adj_pvalue_line=0.05){
+  stopifnot(class(de_res)[1]=="data.frame" & all(c(fold_change,adj_pvalue,de_class)%in%colnames(de_res)))
+  g = ggplot(data=de_res,aes(x=.data[[fold_change]],y=-log10(.data[[adj_pvalue]]),colour=factor(.data[[de_class]]))) +
     geom_point() +
     geom_hline(yintercept=-log10(adj_pvalue_line),linetype=4)+
     geom_vline(xintercept=c(-fold_change_line,fold_change_line),linetype=4)

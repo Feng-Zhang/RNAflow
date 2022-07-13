@@ -9,7 +9,7 @@ volcano(
   filename = NULL,
   output_dir = ".",
   fold_change = "log2FoldChange",
-  adj_pavlue = "padj",
+  adj_pvalue = "padj",
   de_class = "regulate",
   fold_change_line = 1,
   adj_pvalue_line = 0.05
@@ -24,7 +24,7 @@ volcano(
 
 \item{fold_change}{a character, the colname of log2(Fold Change) in de_res}
 
-\item{adj_pavlue}{a character, the colname of adjusted P-value in de_res}
+\item{adj_pvalue}{a character, the colname of adjusted P-value in de_res}
 
 \item{de_class}{a character, the colname of differential expression type in de_res}
 

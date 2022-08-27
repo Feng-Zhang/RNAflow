@@ -1,4 +1,4 @@
 library(testthat)
-library(RNAseqFlow)
+library(RNAflow)
 
-test_check("RNAseqFlow")
+test_check("RNAflow")

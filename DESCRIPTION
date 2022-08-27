@@ -1,18 +1,28 @@
-Package: RNAseqFlow
+Package: RNAflow
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.1.1
+Version: 0.1.2
 Author: Feng Zhang
 Maintainer: The package maintainer <fengzhang0709@hotmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-Imports: clusterProfiler, DESeq2, enrichplot, ggplot2, pasilla,
-        stringr, org.Hs.eg.db, GEOmeta
+Imports:
+  clusterProfiler,
+  DESeq2,
+  ggplot2,
+  pasilla,
+  stringr,
+  org.Hs.eg.db
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.2.0
-Suggests: knitr, DOSE (>= 3.16.0), testthat (>= 2.0.0), rmarkdown,
-        org.Dm.eg.db
+LazyData: true
+RoxygenNote: 7.2.1
+Suggests: 
+    knitr,
+    DOSE (>= 3.16.0),
+    testthat (>= 2.0.0),
+    rmarkdown,
+    org.Dm.eg.db
 Config/testthat/edition: 2
 VignetteBuilder: knitr
 NeedsCompilation: no

@@ -1,11 +1,11 @@
 ---
-title: "Introduction to RNAseqFlow"
+title: "Introduction to RNAflow"
 author: "Feng Zhang"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette: default
-  md_document: default
 show_toc: yes
+
 vignette: >
   %\VignetteIndexEntry{Introduction to RNAseqFlow} 
   %\VignetteEngine{knitr::rmarkdown} 
@@ -17,14 +17,13 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   echo = TRUE,
   comment = "#>",
-  fig.path = "../Figs/",
   warning=FALSE,
   message = FALSE
 )
-#rmarkdown::render("vignettes/base.Rmd",output_format = "md_document")
+#rmarkdown::render("vignettes/base.Rmd",output_format = "html_document")
 ```
 
-## RNAseq 工作流程
+## Differential analysis wrapping DEseq2 functions
 ```{r}
 library(RNAseqFlow)
 input <- createCountPhe()
@@ -38,14 +37,13 @@ volcano(res) # plot volcano
 DEsig <- row.names(res)[res$regulate!="Normal"]
 ```
 
-## 富集分析
-加载一些程序包：
+## Enrichment analysis wrapping clusterProfiler functions
 ```{r}
 library(org.Dm.eg.db)
 library(clusterProfiler)
 ```
 
-### GO 过度代表检验 (over-representation test)
+### The over-representation test based on GO terms
 ```{r}
 idType(OrgDb = org.Dm.eg.db)
 go_res <- enrichGO(DEsig,keyType="ENSEMBL",OrgDb=org.Dm.eg.db)
@@ -53,15 +51,15 @@ head(go_res)
 ```
 
 
-### KEGG 过度代表检验 (over-representation test)
+### The over-representation test based on pathway from KEGG database
 ```{r}
 DEsig_entrezid <- bitr(DEsig, fromType="ENSEMBL", toType="ENTREZID", OrgDb=org.Dm.eg.db)[,2]
 kegg_res <- enrichKEGG(DEsig_entrezid,keyType="ncbi-geneid",organism="dme");
 head(kegg_res)
 ```
-值得注意的是，当进行KEGG或gseKEGG时，如果物种是人类，那么基因名为ENTREZID时，对应的keyType是"kegg"或"ncbi-geneid"。当对其它物种进行分析时，ENTREZID对应的是ncbi-geneid。
+Note the `keyType` parameter should be "kegg" or "ncbi-geneid" human, and "ncbi-geneid" for other organism.
 
-### GO的GSEA分析
+### GSEA based on GO terms
 ```{r}
 gene_list <- res$log2FoldChange
 names(gene_list)=row.names(res)
@@ -76,24 +74,13 @@ if(nrow(gsea_go_res)>=1){
 
 ```
 
-### KEGG的GSEA分析
+### GSEA based on pathway from KEGG database
 ```{r}
 gsea_kegg_res <- GSEA_kegg(gene_list,type="ENSEMBL",organism = "dme",db=org.Dm.eg.db,pvalueCutoff=1)
 if(nrow(gsea_kegg_res)>1){
   print(gseaplot(gsea_kegg_res,geneSetID=gsea_kegg_res$ID[1],title=paste("KEGG : ",gsea_kegg_res$Description[1],sep="")))
 }
 ```
-
-### GSEA using human databale
-```{r}
-library(org.Hs.eg.db)
-data(geneList,package = "DOSE")
-gsea_go_res <- gseGO(geneList,keyType="ENTREZID",OrgDb=org.Hs.eg.db)
-print(plot_overallGSEA(head(gsea_go_res,20),"Description","NES"))
-gsea_kegg_res <- GSEA_kegg(geneList,organism = "hsa",type = "ENTREZID")
-print(plot_overallGSEA(head(gsea_kegg_res,20),"Description","NES"))
-```
-
 
 
 

@@ -1,15 +1,15 @@
-# RNAseqFlow
+# RNAflow
 
-## 安装
+## Installation
 
 ```R
-devtools::install_github("Feng-Zhang/RNAseqFlow") #安装稳定版
-devtools::install_github("Feng-Zhang/RNAseqFlow@dev") #安装开发版
+devtools::install_github("Feng-Zhang/RNAflow") # install stable version
+devtools::install_github("Feng-Zhang/RNAflow@dev") # install development version
 ```
 
 
 
-## 使用
+## Documentation
 
-使用方法参见[介绍文档](https://github.com/Feng-Zhang/RNAseqFlow/blob/master/vignettes/base.md)。
+The quick guide can be found [here](https://htmlpreview.github.io/?https://github.com/Feng-Zhang/RNAflow/blob/master/vignettes/base.html).
 

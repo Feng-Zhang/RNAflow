@@ -7,7 +7,7 @@ output:
 show_toc: yes
 
 vignette: >
-  %\VignetteIndexEntry{Introduction to RNAseqFlow} 
+  %\VignetteIndexEntry{Introduction to RNAflow} 
   %\VignetteEngine{knitr::rmarkdown} 
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,12 +21,14 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 #rmarkdown::render("vignettes/base.Rmd",output_format = "html_document")
+set.seed(123)
 ```
 
 ## Differential analysis wrapping DEseq2 functions
+
 ```{r}
-library(RNAseqFlow)
-input <- createCountPhe()
+library(RNAflow)
+input <- create_count_phe()
 
 head(input[[1]])
 input[[2]]
@@ -38,33 +40,37 @@ DEsig <- row.names(res)[res$regulate!="Normal"]
 ```
 
 ## Enrichment analysis wrapping clusterProfiler functions
+
 ```{r}
 library(org.Dm.eg.db)
 library(clusterProfiler)
 ```
 
 ### The over-representation test based on GO terms
+
 ```{r}
 idType(OrgDb = org.Dm.eg.db)
 go_res <- enrichGO(DEsig,keyType="ENSEMBL",OrgDb=org.Dm.eg.db)
 head(go_res)
 ```
 
-
 ### The over-representation test based on pathway from KEGG database
+
 ```{r}
 DEsig_entrezid <- bitr(DEsig, fromType="ENSEMBL", toType="ENTREZID", OrgDb=org.Dm.eg.db)[,2]
 kegg_res <- enrichKEGG(DEsig_entrezid,keyType="ncbi-geneid",organism="dme");
 head(kegg_res)
 ```
+
 Note the `keyType` parameter should be "kegg" or "ncbi-geneid" human, and "ncbi-geneid" for other organism.
 
 ### GSEA based on GO terms
+
 ```{r}
 gene_list <- res$log2FoldChange
 names(gene_list)=row.names(res)
 gene_list <- sort(gene_list, decreasing = TRUE)
-gsea_go_res <- gseGO(gene_list,keyType="ENSEMBL",OrgDb=org.Dm.eg.db)
+gsea_go_res <- gseGO(gene_list,keyType="ENSEMBL",OrgDb=org.Dm.eg.db,pvalueCutoff = 0.1)
 head(gsea_go_res)
 
 if(nrow(gsea_go_res)>=1){
@@ -75,13 +81,11 @@ if(nrow(gsea_go_res)>=1){
 ```
 
 ### GSEA based on pathway from KEGG database
+
 ```{r}
 gsea_kegg_res <- GSEA_kegg(gene_list,type="ENSEMBL",organism = "dme",db=org.Dm.eg.db,pvalueCutoff=1)
+head(gsea_kegg_res)
 if(nrow(gsea_kegg_res)>1){
   print(gseaplot(gsea_kegg_res,geneSetID=gsea_kegg_res$ID[1],title=paste("KEGG : ",gsea_kegg_res$Description[1],sep="")))
 }
 ```
-
-
-
-

@@ -11,7 +11,7 @@
 ##' @return NULL
 ##' @examples
 ##' \dontrun{
-##' input = createCountPhe()
+##' input = create_count_phe()
 ##' dds = create_DEseq(input[[1]],input[[2]],ref_level="untreated")
 ##' res = DESeq_res(dds)
 ##' volcano(res)
@@ -22,13 +22,13 @@
 ##'
 volcano <- function(de_res,filename=NULL,output_dir=".",fold_change="log2FoldChange",adj_pvalue="padj",de_class="regulate",fold_change_line=1,adj_pvalue_line=0.05){
   stopifnot(class(de_res)[1]=="data.frame" & all(c(fold_change,adj_pvalue,de_class)%in%colnames(de_res)))
-  g = ggplot(data=de_res,aes(x=.data[[fold_change]],y=-log10(.data[[adj_pvalue]]),colour=factor(.data[[de_class]]))) +
+  g <- ggplot(data=de_res,aes(x=.data[[fold_change]],y=-log10(.data[[adj_pvalue]]),colour=factor(.data[[de_class]]))) +
     geom_point() +
     geom_hline(yintercept=-log10(adj_pvalue_line),linetype=4)+
     geom_vline(xintercept=c(-fold_change_line,fold_change_line),linetype=4)
-  p = g+scale_size_identity()+
+  p <- g+scale_size_identity()+
     scale_color_manual(values =c("green","black","red"))+ #"green","black","red" is responding to factor(DEres$de_class), which is "Down","Normal","Up"
-    xlab("log2(Fold Change)")+ylab("-log10(FDR)")+labs(color="de_class")+
+    xlab("log2(Fold Change)")+ylab("-log10(FDR)")+labs(color="regulate")+
     theme_classic()+
     theme(axis.title=element_text(size=15),legend.title = element_text(size=15),legend.text = element_text(size=12),axis.text = element_text(size=rel(1.5)))
 

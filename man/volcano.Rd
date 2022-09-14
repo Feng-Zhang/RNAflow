@@ -37,7 +37,7 @@ This function would plot volcano based on DESeqRes output and save as pdf and pn
 }
 \examples{
 \dontrun{
-input = createCountPhe()
+input = create_count_phe()
 dds = create_DEseq(input[[1]],input[[2]],ref_level="untreated")
 res = DESeq_res(dds)
 volcano(res)

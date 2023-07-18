@@ -47,7 +47,7 @@
 ##'  ego <- gseGO(geneChangeList, ont="BP",OrgDb=org.Hs.eg.db,eps=0)
 ##'  ego <- setReadable(ego, OrgDb =org.Hs.eg.db)
 ##'  data <- ego[127:147,1:9]
-##'  print(overallGSEA(data,"Description","NES"))
+##'  print(plot_overallGSEA(data,"Description","NES"))
 ##'  }
 ##' @import ggplot2
 ##' @export
